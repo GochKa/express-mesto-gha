@@ -1,29 +1,30 @@
-const cards = require("../models/cards")
+
 const Card = require("../models/cards")
 
 //
 const getCard = (_,res) =>{
   Card.find({})
   .populate("owner")
-  .then(cards => res.send({dara: cards}))
+  .then(cards => res.send({data: cards}))
   .catch(() =>{
     return res.status(500).send({message:"Ошибка сервера"})
   })
 }
 
 //
-const createCard = (req, res) =>{
-  const {name, link} = req.body
+const createCard = (req, res) => {
+  const { name, link } = req.body;
 
-  return Card.create({name, link, owner: req.user._id})
-  .then(card => res.send({data: card}))
-  .catch(err =>{
-    if(err){
-      return res.status(400).send({message:"Некотректные данные карточки"})
-    }
-    return res.status(500).send({message:"Ошибка сервера"})
-  })
-}
+  return Card.create({ name, link, owner: req.user._id })
+    .then((card) => res.send({ data: card }))
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(400).send({ message: 'Некорректные данные' });
+        return;
+      }
+      res.status(500).send({ message: 'Ошибка сервера' });
+    });
+};
 
 //
 const deleatCard = (req, res) =>{
