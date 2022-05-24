@@ -5,10 +5,10 @@ const createUser = (req,res) =>{
   const {name, about, avatar} = req.body
 
   return User.create({name, about, avatar})
-  .then(user => res.send({data: user}))
+  .then(user => res.status(201).send({data: user}))
   .catch(err =>{
     if(err.name === 'ValidationError'){
-      return res.status(400).send({message: "Некоректные name, link или avatar"})
+      return res.status(400).send({message: "Некоректные name, about или avatar"})
     }
     return res.status(500).send({message:"Ошибка сервера"})
   })

@@ -17,14 +17,14 @@ const app = express()
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-//
-//app.use((req, _, next) => {
-  //req.user = {
-   // _id: '628d59c4d87b3a1c6f782926',
-  //};
 
-  //next();
-//});
+app.use((req, _, next) => {
+  req.user = {
+    _id: '628d68277b36dbe8a62834f8',
+  };
+
+  next();
+});
 
 
 app.use('/', require('./routes/users'));
