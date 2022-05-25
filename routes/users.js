@@ -1,5 +1,6 @@
 const router = require('express').Router();
 
+// Импорт из контроллера
 const {
   getUsers, getUser, createUser, patchUser, patchAvatar,
 } = require('../controllers/users');

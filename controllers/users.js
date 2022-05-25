@@ -1,6 +1,6 @@
 const User = require('../models/user');
 
-//
+// Создание нового пользователя
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
@@ -14,7 +14,7 @@ const createUser = (req, res) => {
     });
 };
 
-//
+// Получение информации о нужном пользователе
 const getUsers = (_, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
@@ -38,7 +38,7 @@ const getUser = (req, res) => {
     });
 };
 
-//
+// Обновление информации пользователя
 const patchUser = (req, res) => {
   const { name, about } = req.body;
 
@@ -62,7 +62,7 @@ const patchUser = (req, res) => {
     });
 };
 
-//
+// Обновление аватара пользователя
 const patchAvatar = (req, res) => {
   const { avatar } = req.body;
 
@@ -85,6 +85,7 @@ const patchAvatar = (req, res) => {
     });
 };
 
+// Экспорт
 module.exports = {
   createUser,
   getUsers,

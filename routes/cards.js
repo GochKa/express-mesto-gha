@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-//
+// Импорт из контроллера
 const {
   getCard, createCard, deleatCard, likeCard, dislikeCard,
 } = require('../controllers/cards');
