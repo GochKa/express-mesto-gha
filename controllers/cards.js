@@ -36,7 +36,7 @@ const deleatCard = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(400).send({ message: 'Некотректный Id карточки' });
       }
-      return res.status(500).send({ message: 'Ошибка сервера' });
+      return res.status(400).send({ message: 'Ошибка сервера' });
     });
 };
 
