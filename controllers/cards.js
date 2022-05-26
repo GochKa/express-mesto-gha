@@ -15,11 +15,11 @@ const createCard = (req, res) => {
   return Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         res.status(400).send({ message: 'Некорректные данные' });
         return;
       }
-      res.status(400).send({ message: 'Ошибка сервера' });
+      res.status(500).send({ message: 'Ошибка сервера' });
     });
 };
 
@@ -36,7 +36,7 @@ const deleatCard = (req, res) => {
       if (err.name === 'CastError') {
         return res.status(400).send({ message: 'Некотректный Id карточки' });
       }
-      return res.status(400).send({ message: 'Ошибка сервера' });
+      return res.status(500).send({ message: 'Ошибка сервера' });
     });
 };
 
@@ -58,7 +58,7 @@ const likeCard = (req, res) => {
       return res.send({ data: card });
     })
     .catch((err) => {
-      if (err) {
+      if (err.name === 'CastError') {
         return res.status(400).send({ message: 'Некотректный Id карточки' });
       }
       return res.status(500).send({ message: 'Ошибка сервера' });
@@ -83,7 +83,7 @@ const dislikeCard = (req, res) => {
       return res.send({ data: card });
     })
     .catch((err) => {
-      if (err) {
+      if (err.name === 'CastError') {
         return res.status(400).send({ message: 'Некотректный Id карточки' });
       }
       return res.status(500).send({ message: 'Ошибка сервера' });
