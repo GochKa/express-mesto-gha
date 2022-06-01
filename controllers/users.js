@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
-// const UnauthorizedError = require('../errors/unauthorized');
+const UnauthorizedError = require('../errors/unauthorized');
 const NotFoundErr = require('../errors/not-found-err');
 const ConflictErr = require('../errors/conflict');
 const BadRequestErr = require('../errors/bad-request');
@@ -15,9 +15,14 @@ const login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'super-strong-secret', { expiresIn: '7d' });
 
-      res.send(token);
+      res.send({ token });
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'Error') {
+        throw new UnauthorizedError('Неверные почти или пароль');
+      }
+      next(err);
+    });
 };
 
 // Создание нового пользователя
