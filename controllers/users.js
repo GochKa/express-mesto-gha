@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
-// const UnauthorizedError = require('../errors/unauthorized');
+const UnauthorizedError = require('../errors/unauthorized');
 const NotFoundErr = require('../errors/not-found-err');
 const ConflictErr = require('../errors/conflict');
 const BadRequestErr = require('../errors/bad-request');
@@ -17,7 +17,12 @@ const login = (req, res, next) => {
 
       res.send(token);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'Error') {
+        throw new UnauthorizedError('Неверные почта или пароль');
+      }
+      next(err);
+    });
 };
 
 // Создание нового пользователя
