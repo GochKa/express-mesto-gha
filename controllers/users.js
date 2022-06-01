@@ -3,9 +3,9 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 const UnauthorizedError = require('../errors/unauthorized');
-const NotFoundErr = require('../errors/not-found-err');
-const ConflictErr = require('../errors/conflict');
-const BadRequestErr = require('../errors/bad-request');
+const NotFoundError = require('../errors/not-found-err');
+const ConflictError = require('../errors/conflict');
+const BadRequestError = require('../errors/bad-request');
 // Логин пользователя
 
 const { JWT_SECRET } = process.env;
@@ -45,7 +45,7 @@ const createUser = (req, res, next) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.code === 11000 || err.name === 'ValidationError') {
-        throw new ConflictErr('Данный email уже зарегестрирован');
+        throw new ConflictError('Данный email уже зарегестрирован');
       }
       next(err);
     });
@@ -63,13 +63,13 @@ const getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        throw new NotFoundErr('Запрашиваемый пользователь не найден');
+        throw new NotFoundError('Запрашиваемый пользователь не найден');
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestErr('id некорректен');
+        throw new BadRequestError('id некорректен');
       }
       next(err);
     });
@@ -80,7 +80,7 @@ const getUserMe = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        throw new NotFoundErr('Запрашиваемый пользователь не найден');
+        throw new NotFoundError('Запрашиваемый пользователь не найден');
       }
       return res.send({ data: user });
     })
@@ -107,7 +107,7 @@ const patchUser = (req, res, next) => {
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestErr('Некоректные name или about');
+        throw new BadRequestError('Некоректные name или about');
       }
       next(err);
     });

@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-const NotFoundErr = require('./errors/not-found-err');
+const NotFoundError = require('./errors/not-found-err');
 // Установка порта
 const { PORT = 3000 } = process.env;
 
@@ -25,7 +25,7 @@ app.use(auth);
 app.use('/', auth, require('./routes/users'));
 app.use('/', auth, require('./routes/cards'));
 
-app.use('*', (_, __, next) => next(new NotFoundErr('Запрашиваемая страница не найдена')));
+app.use('*', (_, __, next) => next(new NotFoundError('Запрашиваемая страница не найдена')));
 
 app.use((err, req, res, next) => {
   if (err.status) {
