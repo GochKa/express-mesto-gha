@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
-const UnauthorizedError = require('../errors/unauthorized');
+// const UnauthorizedError = require('../errors/unauthorized');
 const NotFoundError = require('../errors/not-found-err');
 const ConflictError = require('../errors/conflict');
 const BadRequestError = require('../errors/bad-request');
@@ -14,7 +14,7 @@ const login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    throw new UnauthorizedError('Неверные почти или пароль');
+    throw new BadRequestError('Неверные почти или пароль');
   }
   return User.findUserByCredentials(email, password)
     .then((user) => {
