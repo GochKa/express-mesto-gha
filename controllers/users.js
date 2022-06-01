@@ -13,6 +13,9 @@ const { JWT_SECRET } = process.env;
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
+  if (!email || !password) {
+    throw new UnauthorizedError('Неверные почти или пароль');
+  }
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
@@ -25,9 +28,6 @@ const login = (req, res, next) => {
       res.send({ token });
     })
     .catch((err) => {
-      if (err.name === 'Error') {
-        throw new UnauthorizedError('Неверные почти или пароль');
-      }
       next(err);
     });
 };
