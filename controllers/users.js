@@ -42,7 +42,12 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => res.send({ data: user }))
+    .then((user) => res.send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email,
+    }))
     .catch((err) => {
       if (err.code === 11000 || err.name === 'ValidationError') {
         throw new ConflictError('Данный email уже зарегестрирован');
