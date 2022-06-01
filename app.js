@@ -2,9 +2,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { errors } = require('celebrate');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/not-found-err');
+
 // Установка порта
 const { PORT = 3000 } = process.env;
 
@@ -22,10 +24,12 @@ app.post('/signup', createUser);
 
 app.use(auth);
 
-app.use('/', require('./routes/users'));
-app.use('/', require('./routes/cards'));
+app.use('/', auth, require('./routes/users'));
+app.use('/', auth, require('./routes/cards'));
 
 app.use('*', (_, __, next) => next(new NotFoundError('Запрашиваемая страница не найдена')));
+
+app.use(errors());
 
 app.use((err, req, res, next) => {
   if (err.status) {
