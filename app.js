@@ -22,8 +22,8 @@ app.post('/signup', createUser);
 
 app.use(auth);
 
-app.use('/', auth, require('./routes/users'));
-app.use('/', auth, require('./routes/cards'));
+app.use('/', require('./routes/users'));
+app.use('/', require('./routes/cards'));
 
 app.use('*', (_, __, next) => next(new NotFoundError('Запрашиваемая страница не найдена')));
 
