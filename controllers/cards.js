@@ -1,47 +1,53 @@
 const Card = require('../models/cards');
+const BadRequestErr = require('../errors/bad-request');
+const NotFoundErr = require('../errors/not-found-err');
+const ForbiddenErr = require('../errors/forbidden');
 
 // Получение карточки
-const getCard = (_, res) => {
+const getCard = (_, res, next) => {
   Card.find({})
     .populate('owner')
     .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(500).send({ message: 'Ошибка сервера' }));
+    .catch((err) => next(err));
 };
 
 // Создание карточки
-const createCard = (req, res) => {
+const createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   return Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(400).send({ message: 'Некорректные данные' });
-        return;
+        throw new BadRequestErr('Некотректные поля name или link');
       }
-      res.status(500).send({ message: 'Ошибка сервера' });
+      next(err);
     });
 };
 
 // Удаление карточки по id'шнику
-const deleatCard = (req, res) => {
+const deleatCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'Карточка с таким Id не найдена' });
+        throw new NotFoundErr('Запрашиваемая карточка не найдена');
+      } if (req.user._id !== JSON.stringify(card.owner).slice(1, -1)) {
+        throw new ForbiddenErr('Невозможно удалиь чужую карточку');
+      } else {
+        return card.remove()
+          .then(() => res.send({ data: card }));
       }
-      return res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Некотректный Id карточки' });
+        throw new BadRequestErr('Неверный id карточки');
       }
-      return res.status(500).send({ message: 'Ошибка сервера' });
+      next(err);
     });
 };
 
 // Лайк карточки
-const likeCard = (req, res) => {
+const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     {
@@ -53,20 +59,20 @@ const likeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'В базе данных такой карточки нет' });
+        throw new NotFoundErr('В базе данных такой карточки нет');
       }
       return res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Некотректный Id карточки' });
+        throw new BadRequestErr('Неверный id карточки');
       }
-      return res.status(500).send({ message: 'Ошибка сервера' });
+      next(err);
     });
 };
 
 // Дизлайк карточки
-const dislikeCard = (req, res) => {
+const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     {
@@ -78,15 +84,15 @@ const dislikeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        return res.status(404).send({ message: 'В базе данных такой карточки нет' });
+        throw new NotFoundErr('В базе данных такой карточки нет');
       }
       return res.send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Некотректный Id карточки' });
+        throw new BadRequestErr('Неверный id карточки');
       }
-      return res.status(500).send({ message: 'Ошибка сервера' });
+      next(err);
     });
 };
 
