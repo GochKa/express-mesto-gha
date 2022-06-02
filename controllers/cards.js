@@ -23,16 +23,36 @@ const createCard = (req, res, next) => {
 
 // Удаление карточки по id'шнику
 const deleatCard = (req, res, next) => {
-  const { cardId } = req.params;
-  Card.deleteCardAsOwner({ cardId, userId: req.user._id })
-    .then((data) => {
-      if (!data) {
-        throw new BadRequestError('Карточка не найдена');
+  const deleatCardHeandler = () => {
+    Card.findByIdAndRemove(req.params.cardId)
+      .then(() => res.send({ message: 'Удаление прошло успешно' }))
+      .catch((err) => {
+        if (err.name === 'CastError') {
+          return next(new BadRequestError('Передан неверный Id карточки'));
+        }
+        return next(err);
+      });
+  };
+
+  Card.findById(req.params.cardId)
+    .then((cardInfo) => {
+      if (!cardInfo) {
+        return next(new NotFoundError('Карточка с указанным ID не найдена в базе'));
       }
-      res.send(data);
+
+      if (req.user._id !== cardInfo.owner.toString()) {
+        return next(new ForbiddenError('Недостаточно прав для совершения этого действия'));
+      }
+      return deleatCardHeandler();
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return next(new BadRequestError('Передан неверный Id карточки'));
+      }
+      return next(err);
+    });
 };
+
 // Лайк карточки
 const likeCard = (req, res, next) => {
   const { cardId } = req.params;
