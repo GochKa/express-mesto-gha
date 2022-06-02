@@ -18,18 +18,10 @@ const createUser = (req, res, next) => {
     throw new BadRequestError('Введены некоректные данные пользователя');
   }
 
-  return bcrypt.hash(paswword, 10)
+  bcrypt.hash(paswword, 10)
     .then((hash) => User.create({
       name, about, avatar, email, paswword: hash,
-    })
-      .then((user) => {
-        res.send({
-          name: user.name,
-          about: user.about,
-          avatar: user.avatar,
-          email,
-        });
-      }))
+    }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new BadRequestError('Введены некоректные данные пользователя');
@@ -37,8 +29,16 @@ const createUser = (req, res, next) => {
       if (err.code === 11000) {
         throw new ConflictError('Пользователь с таким email уже зарегестрирован');
       }
-      return next(err);
-    });
+    })
+    .then((user) => {
+      res.status(201).send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+      });
+    })
+    .catch(next);
 };
 
 // Получение информации о пользователях
