@@ -34,7 +34,7 @@ const createUser = (req, res, next) => {
       if (err.name === 'ValidationError') {
         throw new BadRequestError('Переданы некорректные данные при создании пользователя');
       }
-      if (err.code === JWT_SECRET || err.name === 'MongoError') {
+      if (err.code === 11000 || err.name === 'MongoError') {
         throw new ConflictError('Пользователь с таким email уже существует');
       }
       return next(err);
