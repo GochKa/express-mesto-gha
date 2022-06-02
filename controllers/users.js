@@ -58,10 +58,10 @@ const getUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return next(new BadRequestError('Id пользователя не верный'));
+        throw new BadRequestError('Id пользователя не верный');
       }
-      return next(err);
-    });
+    })
+    .catch(next);
 };
 
 // Обновление информации пользователя

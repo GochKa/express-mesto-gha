@@ -1,45 +1,47 @@
 // Импорты пакетов
+
 const express = require('express');
+
 const mongoose = require('mongoose');
+
 const bodyParser = require('body-parser');
 
-const router = require('./routes/users');
-const routerCards = require('./routes/cards');
-const { createUser, login } = require('./controllers/users');
-const auth = require('./middlewares/auth');
-const NotFoundError = require('./errors/not-found');
-const { signinValidator, signupValidator } = require('./validators/auth');
-const { errorHandler } = require('./middlewares/error-handler');
-
 // Установка порта
-const { PORT = 3000 } = process.env;
+
+const {
+  PORT = 3000,
+} = process.env;
 
 // Подключению к базе данных
-mongoose.connect('mongodb://localhost:27017/mestodb', {
-  useNewUrlParser: true,
-  useCreateIndex: true,
-  useFindAndModify: false,
-  useUnifiedTopology: true,
-});
+
+mongoose.connect('mongodb://localhost:27017/mestodb');
 
 // Установка точки входа
+
 const app = express();
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
-app.post('/signin', signinValidator, login);
-app.post('/signup', signupValidator, createUser);
+app.use(bodyParser.urlencoded({
+  extended: true,
+}));
 
-app.use(auth);
+app.use((req, _, next) => {
+  req.user = {
 
-app.use('/users', auth, router);
+    _id: '628d68277b36dbe8a62834f8',
 
-app.use('/cards', auth, routerCards);
+  };
+  next();
+});
 
-app.use('*', auth, (_, res, next) => next(new NotFoundError('Запрашиваемая страница не найдена')));
+app.use('/', require('./routes/users'));
 
-app.use(errorHandler);
+app.use('/', require('./routes/cards'));
+
+app.use('*', (_, res) => res.status(404).send({
+  message: 'Запрашиваемая страница не найдена',
+}));
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
