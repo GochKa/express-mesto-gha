@@ -21,15 +21,15 @@ const createUser = (req, res, next) => {
   return bcrypt.hash(paswword, 10)
     .then((hash) => User.create({
       name, about, avatar, email, paswword: hash,
-    }))
-    .then((user) => {
-      res.send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        email,
-      });
     })
+      .then((user) => {
+        res.send({
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          email,
+        });
+      }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         throw new BadRequestError('Введены некоректные данные пользователя');
