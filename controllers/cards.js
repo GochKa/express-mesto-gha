@@ -25,11 +25,11 @@ const createCard = (req, res, next) => {
 const deleatCard = (req, res, next) => {
   const { cardId } = req.params;
   Card.deleteCardAsOwner({ cardId, userId: req.user._id })
-    .then((card) => {
-      if (!card) {
+    .then((data) => {
+      if (!data) {
         throw new BadRequestError('Карточка не найдена');
       }
-      res.send(card);
+      res.send(data);
     })
     .catch(next);
 };
