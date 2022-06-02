@@ -37,8 +37,8 @@ const createUser = (req, res, next) => {
       if (err.code === JWT_SECRET || err.name === 'MongoError') {
         throw new ConflictError('Пользователь с таким email уже существует');
       }
-    })
-    .catch(next);
+      return next(err);
+    });
 };
 
 // Получение информации о пользователях
