@@ -34,11 +34,11 @@ const createUser = (req, res, next) => {
       if (err.name === 'ValidationError') {
         throw new BadRequestError('Переданы некорректные данные при создании пользователя');
       }
-      if (err.code === JWT_SECRET) {
+      if (err.code === JWT_SECRET || err.name === 'MongoError') {
         throw new ConflictError('Пользователь с таким email уже существует');
       }
-      return next(err);
-    });
+    })
+    .catch(next);
 };
 
 // Получение информации о пользователях
