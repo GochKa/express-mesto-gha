@@ -27,7 +27,7 @@ const deleatCard = (req, res, next) => {
     Card.findByIdAndRemove(req.params.cardId)
       .then(() => res.send({ message: 'Удаление прошло успешно' }))
       .catch((err) => {
-        if (err.name === 'CastError') {
+        if (err.kind === 'ObjectId') {
           return next(new BadRequestError('Передан неверный Id карточки'));
         }
         return next(err);
@@ -46,7 +46,7 @@ const deleatCard = (req, res, next) => {
       return deleatCardHeandler();
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.kind === 'ObjectId') {
         return next(new BadRequestError('Передан неверный Id карточки'));
       }
       return next(err);
