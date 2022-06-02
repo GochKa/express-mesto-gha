@@ -1,58 +1,63 @@
 const mongoose = require('mongoose');
-const validator = require('validator');
-const bcrypt = require('bcryptjs');
+const isEmail = require('validator/lib/isEmail');
+const bcrypt = require('bcrypt');
+const { reg } = require('../utils/reg');
+
+const UnauthorizedError = require('../errors/unauthorized');
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    default: 'Жак-Ив Кусто',
     minlength: 2,
     maxlength: 30,
   },
   about: {
     type: String,
-    required: true,
+    default: 'Исследователь океанов',
     minlength: 2,
     maxlength: 30,
 
   },
   avatar: {
     type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: true,
-    select: false,
+    default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    validate: {
+      validator: (val) => reg.test(val),
+      message: 'Формат URL некоректен',
+    },
   },
   email: {
     type: String,
     required: true,
     unique: true,
     validate: {
-      validator: (email) => validator.isEmail(email),
-      message: 'Неверный формат почты',
+      validator: (v) => isEmail(v),
+      message: 'Формат Email некоректен',
     },
+  },
+  password: {
+    type: String,
+    required: true,
+    select: false,
   },
 });
 
 // eslint-disable-next-line func-names
-userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email }).select('+password')
+userSchema.static.findUserByCredentials = function (email, password) {
+  this.findOne({ email }, { runValidators: true })
+    .select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Неправильно заполнены поля почты или пароля'));
+        return Promise.reject(new UnauthorizedError('Неверные email или password'));
       }
-
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new Error('Неправильно заполнены поля почты или пароля'));
+            return Promise.reject(new UnauthorizedError('Неверные email или password'));
           }
-
           return user;
         });
     });
 };
-
 module.exports = mongoose.model('user', userSchema);
