@@ -11,35 +11,34 @@ const { JWT_SECRET = 'secret-code' } = process.env;
 // Регистрация нового пользователя
 const createUser = (req, res, next) => {
   const {
-    name, about, avatar, email, paswword,
+    name, about, avatar, email, password,
   } = req.body;
 
-  if (!email || !paswword) {
-    throw new BadRequestError('Введены некоректные данные пользователя');
+  if (!email || !password) {
+    return next(new BadRequestError('Не передан email или пароль'));
   }
 
-  bcrypt.hash(paswword, 10)
+  return bcrypt.hash(password, 10)
     .then((hash) => User.create({
-      name, about, avatar, email, paswword: hash,
-    }))
+      name, about, avatar, email, password: hash,
+    })
+      .then((user) => {
+        res.send({
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          email,
+        });
+      }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Введены некоректные данные пользователя');
+        return next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
       }
-      if (err.code === 11000) {
-        throw new ConflictError('Пользователь с таким email уже зарегестрирован');
+      if (err.code === JWT_SECRET) {
+        return next(new ConflictError('Пользователь с таким email уже существует'));
       }
-    })
-    .then((user) => {
-      res.send({
-        name: user.name,
-        about: user.about,
-        avatar: user.avatar,
-        email: user.email,
-      });
-      return res.status(201).send({ message: 'Пользователь создан' });
-    })
-    .catch(next);
+      return next(err);
+    });
 };
 
 // Получение информации о пользователях
