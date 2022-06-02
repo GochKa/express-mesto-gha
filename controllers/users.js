@@ -15,7 +15,7 @@ const createUser = (req, res, next) => {
   } = req.body;
 
   if (!email || !password) {
-    return next(new BadRequestError('Не передан email или пароль'));
+    throw new BadRequestError('Не передан email или пароль');
   }
 
   return bcrypt.hash(password, 10)
@@ -32,10 +32,10 @@ const createUser = (req, res, next) => {
       }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
+        throw new BadRequestError('Переданы некорректные данные при создании пользователя');
       }
       if (err.code === JWT_SECRET) {
-        return next(new ConflictError('Пользователь с таким email уже существует'));
+        throw new ConflictError('Пользователь с таким email уже существует');
       }
       return next(err);
     });
