@@ -13,30 +13,29 @@ const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, paswword,
   } = req.body;
-  if (!email || !paswword) {
-    return next(new BadRequestError('Введены неверные email или password'));
-  }
-  return bcrypt.hash(paswword, 10)
+
+  bcrypt.hash(paswword, 10)
     .then((hash) => User.create({
       name, about, avatar, email, paswword: hash,
+    }))
+    .then(({ _id }) => {
+      res.send({
+        _id,
+        name,
+        about,
+        avatar,
+        email,
+      });
     })
-      .then((user) => {
-        res.send({
-          name: user.name,
-          about: user.about,
-          avatar: user.avatar,
-          email,
-        });
-      }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return next(new BadRequestError('Введены некоректные данные пользователя'));
+        throw new BadRequestError('Введены некоректные данные пользователя');
       }
       if (err.code === 11000) {
-        return next(new ConflictError('Пользователь с таким email уже зарегестрирован'));
+        throw new ConflictError('Пользователь с таким email уже зарегестрирован');
       }
-      return next(err);
-    });
+    })
+    .catch(next);
 };
 
 // Получение информации о пользователях
@@ -80,13 +79,13 @@ const patchUser = (req, res, next) => {
       runValidators: true,
     },
   )
-    .then((user) => res.send({ data: user }))
+    .then((data) => res.send(data))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return next(new BadRequestError('Некоректные name или about'));
+        throw new BadRequestError('Некоректные name или about');
       }
-      return next(err);
-    });
+    })
+    .catch(next);
 };
 
 // Обновление аватара пользователя
@@ -103,13 +102,13 @@ const patchAvatar = (req, res, next) => {
       runValidators: true,
     },
   )
-    .then((user) => res.send({ data: user }))
+    .then((data) => res.send(data))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return next(new BadRequestError('Некоректная ссылка avatar'));
+        throw new BadRequestError('Некоректная ссылка avatar');
       }
-      return next(err);
-    });
+    })
+    .catch(next);
 };
 
 // Логин пользователя
@@ -133,19 +132,15 @@ const login = (req, res, next) => {
 
 //
 const getCurrentUser = (req, res, next) => {
-  User.findById(req.user._id)
-    .then((user) => {
-      if (!user) {
-        return next(new NotFoundError('Пользователь с указанным _id не найден'));
+  const usersId = req.user._id;
+  User.findById(usersId)
+    .then((data) => {
+      if (!data) {
+        throw new NotFoundError('Пользователь с указанным _id не найден');
       }
-      return res.send(user);
+      res.send(data);
     })
-    .catch((err) => {
-      if (err.kind === 'ObjectId') {
-        return next(new BadRequestError('Переданный _id некорректный'));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
 // Экспорт
