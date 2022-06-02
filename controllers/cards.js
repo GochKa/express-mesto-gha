@@ -68,7 +68,7 @@ const likeCard = (req, res, next) => {
   )
     .then((data) => {
       if (!data) {
-        throw new NotFoundError('В базе данных такой карточки нет');
+        return next(new NotFoundError('В базе данных такой карточки нет'));
       }
       return res.send(data);
     })
@@ -90,7 +90,7 @@ const dislikeCard = (req, res, next) => {
   )
     .then((data) => {
       if (!data) {
-        throw new NotFoundError('В базе данных такой карточки нет');
+        return next(new NotFoundError('В базе данных такой карточки нет'));
       }
       return res.send(data);
     })
