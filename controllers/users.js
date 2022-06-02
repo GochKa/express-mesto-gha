@@ -37,8 +37,8 @@ const createUser = (req, res, next) => {
       if (err.code === 11000) {
         throw new ConflictError('Пользователь с таким email уже зарегестрирован');
       }
-    })
-    .catch(next);
+      return next(err);
+    });
 };
 
 // Получение информации о пользователях
