@@ -49,7 +49,7 @@ app.use('/users', auth, router);
 
 app.use('/cards', auth, routerCards);
 
-app.use('*', auth, (_, __, next) => next(new NotFoundError('Запрашиваемая страница не найдена')));
+app.use('*', auth, (_, res, next) => next(new NotFoundError('Запрашиваемая страница не найдена')));
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
