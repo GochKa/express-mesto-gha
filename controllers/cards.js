@@ -66,11 +66,11 @@ const likeCard = (req, res, next) => {
       new: true,
     },
   )
-    .then((data) => {
-      if (!data) {
+    .then((card) => {
+      if (!card) {
         return next(new NotFoundError('В базе данных такой карточки нет'));
       }
-      return res.send(data);
+      return res.send(card);
     })
     .catch(next);
 };
@@ -88,11 +88,11 @@ const dislikeCard = (req, res, next) => {
       new: true,
     },
   )
-    .then((data) => {
-      if (!data) {
+    .then((card) => {
+      if (!card) {
         return next(new NotFoundError('В базе данных такой карточки нет'));
       }
-      return res.send(data);
+      return res.send(card);
     })
     .catch(next);
 };
