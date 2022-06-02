@@ -31,12 +31,13 @@ const createUser = (req, res, next) => {
       }
     })
     .then((user) => {
-      res.status(201).send({
+      res.send({
         name: user.name,
         about: user.about,
         avatar: user.avatar,
         email: user.email,
       });
+      return res.status(201).send({ message: 'Пользователь создан' });
     })
     .catch(next);
 };
