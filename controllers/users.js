@@ -40,20 +40,22 @@ const createUser = (req, res, next) => {
 };
 
 // Получение информации о пользователях
-const getUsers = (_, res, next) => {
+const getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.send({ data: users }))
+    .then((data) => res.send(data))
     .catch(next);
 };
 
 // Получение информации о конкретном пользователя
 const getUser = (req, res, next) => {
-  User.findById(req.params.userId)
-    .then((user) => {
-      if (!user) {
-        return next(new NotFoundError('Пользователь с таким id не найден в базе'));
+  const { userId } = req.params;
+
+  User.findById(userId)
+    .then((data) => {
+      if (!data) {
+        throw new NotFoundError('Пользователь с таким id не найден в базе');
       }
-      return res.send({ data: user });
+      res.send(data);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
