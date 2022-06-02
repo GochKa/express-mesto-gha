@@ -18,12 +18,7 @@ const createCard = (req, res, next) => {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send(card))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return next(new BadRequestError('Получены некоректные данные для создания карточки'));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
 // Удаление карточки по id'шнику
@@ -60,8 +55,10 @@ const deleatCard = (req, res, next) => {
 
 // Лайк карточки
 const likeCard = (req, res, next) => {
+  const { cardId } = req.params;
+
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    cardId,
     {
       $addToSet: { likes: req.user._id },
     },
@@ -69,24 +66,21 @@ const likeCard = (req, res, next) => {
       new: true,
     },
   )
-    .then((card) => {
-      if (!card) {
-        return next(new NotFoundError('В базе данных такой карточки нет'));
+    .then((data) => {
+      if (!data) {
+        throw new NotFoundError('В базе данных такой карточки нет');
       }
-      return res.send(card);
+      return res.send(data);
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new BadRequestError('Некотректный Id карточки'));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
 // Дизлайк карточки
 const dislikeCard = (req, res, next) => {
+  const { cardId } = req.params;
   Card.findByIdAndUpdate(
-    req.params.cardId,
+
+    cardId,
     {
       $pull: { likes: req.user._id },
     },
@@ -94,18 +88,13 @@ const dislikeCard = (req, res, next) => {
       new: true,
     },
   )
-    .then((card) => {
-      if (!card) {
-        return next(new NotFoundError('В базе данных такой карточки нет'));
+    .then((data) => {
+      if (!data) {
+        throw new NotFoundError('В базе данных такой карточки нет');
       }
-      return res.send(card);
+      return res.send(data);
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new BadRequestError('Некотректный Id карточки'));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
 // Экспорт
