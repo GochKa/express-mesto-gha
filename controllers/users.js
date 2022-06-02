@@ -9,6 +9,7 @@ const ConflictError = require('../errors/conflict');
 
 const { JWT_SECRET = 'secret-code' } = process.env;
 const MONGO_KEY_CODE = 11000;
+
 // Регистрация нового пользователя
 const createUser = (req, res, next) => {
   const {
@@ -37,8 +38,8 @@ const createUser = (req, res, next) => {
       } else if (err.code === MONGO_KEY_CODE && err.name === 'MongoError') {
         throw new ConflictError('Пользователь с таким email уже существует');
       }
-    })
-    .catch(next);
+      return next(err);
+    });
 };
 
 // Получение информации о пользователях
