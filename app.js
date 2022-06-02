@@ -10,6 +10,7 @@ const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/not-found');
 const { reg } = require('./utils/reg');
+const { errorHandler } = require('./middlewares/error-handler');
 
 // Установка порта
 const { PORT = 3000 } = process.env;
@@ -50,6 +51,8 @@ app.use('/users', auth, router);
 app.use('/cards', auth, routerCards);
 
 app.use('*', auth, (_, res, next) => next(new NotFoundError('Запрашиваемая страница не найдена')));
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
