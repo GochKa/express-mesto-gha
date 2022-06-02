@@ -27,7 +27,7 @@ const deleatCard = (req, res, next) => {
     Card.findByIdAndRemove(req.params.cardId)
       .then(() => res.send({ message: 'Удаление прошло успешно' }))
       .catch((err) => {
-        if (err.kind === 'ObjectId') {
+        if (err.name === 'CastError') {
           return next(new BadRequestError('Передан неверный Id карточки'));
         }
         return next(err);
@@ -46,7 +46,7 @@ const deleatCard = (req, res, next) => {
       return deleatCardHeandler();
     })
     .catch((err) => {
-      if (err.kind === 'ObjectId') {
+      if (err.name === 'CastError') {
         return next(new BadRequestError('Передан неверный Id карточки'));
       }
       return next(err);
@@ -66,11 +66,11 @@ const likeCard = (req, res, next) => {
       new: true,
     },
   )
-    .then((card) => {
-      if (!card) {
+    .then((data) => {
+      if (!data) {
         return next(new NotFoundError('В базе данных такой карточки нет'));
       }
-      return res.send(card);
+      return res.send(data);
     })
     .catch(next);
 };
