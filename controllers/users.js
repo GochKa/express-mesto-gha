@@ -18,12 +18,11 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, paswword: hash,
     }))
-    .then(({ _id }) => {
+    .then((user) => {
       res.send({
-        _id,
-        name,
-        about,
-        avatar,
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
         email,
       });
     })
