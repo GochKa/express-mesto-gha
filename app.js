@@ -1,11 +1,17 @@
 // Импорты пакетов
-
 const express = require('express');
-
 const mongoose = require('mongoose');
-
 const bodyParser = require('body-parser');
+const helmet = require('helmet');
+const { celebrate, Joi, errors } = require('celebrate');
+const cookieParser = require('cookie-parser');
 
+const auth = require('./middlewares/auth');
+const router = require('./routes/users');
+const routerCards = require('./routes/cards');
+const { createUser, login } = require('./controllers/users');
+const { reg } = require('./utils/reg');
+const errHandler = require('./middlewares/error-handler');
 // Установка порта
 
 const {
@@ -13,7 +19,6 @@ const {
 } = process.env;
 
 // Подключению к базе данных
-
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
 // Установка точки входа
@@ -21,27 +26,36 @@ mongoose.connect('mongodb://localhost:27017/mestodb');
 const app = express();
 
 app.use(bodyParser.json());
+app.use(cookieParser());
+app.use(helmet());
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'ru'] } }).required(),
+    password: Joi.string().required(),
+  }),
+}), login);
 
-app.use(bodyParser.urlencoded({
-  extended: true,
-}));
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().pattern(new RegExp(reg)),
+    email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'ru'] } }).required(),
+    password: Joi.string().required(),
+  }),
+}), createUser);
 
-app.use((req, _, next) => {
-  req.user = {
+app.use('/', auth, router);
 
-    _id: '628d68277b36dbe8a62834f8',
-
-  };
-  next();
-});
-
-app.use('/', require('./routes/users'));
-
-app.use('/', require('./routes/cards'));
+app.use('/', auth, routerCards);
 
 app.use('*', (_, res) => res.status(404).send({
   message: 'Запрашиваемая страница не найдена',
 }));
+
+app.use(errors());
+
+app.use(errHandler);
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
