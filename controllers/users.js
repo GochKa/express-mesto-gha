@@ -119,17 +119,14 @@ const patchAvatar = (req, res, next) => {
 const login = (req, res, next) => {
   const { email, paswword } = req.params;
 
-  if (!email || !paswword) {
-    return next(new BadRequestError('Неверно заполнено поле email или password'));
-  }
-  return User.findUserByCredentials(email, paswword)
+  User.findUserByCredentials(email, paswword)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
       res.cookie('jwt', token, {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
-      });
-      res.send({ token });
+      })
+        .send({ token });
     })
     .catch(next);
 };
