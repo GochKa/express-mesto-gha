@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
-const isEmail = require('validator/lib/isEmail');
+const validator = require('validator');
 const bcrypt = require('bcrypt');
-const { reg } = require('../utils/reg');
 
 const UnauthorizedError = require('../errors/unauthorized');
 
@@ -23,7 +22,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     validate: {
-      validator: (val) => reg.test(val),
+      validator(link) {
+        return validator.isURL(link);
+      },
       message: 'Формат URL некоректен',
     },
   },
@@ -32,19 +33,22 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     validate: {
-      validator: (v) => isEmail(v),
+      validator(email) {
+        return validator.isEmail(email);
+      },
       message: 'Формат Email некоректен',
     },
   },
   password: {
     type: String,
     required: true,
+    minlength: 8,
     select: false,
   },
 });
 
 // eslint-disable-next-line func-names
-userSchema.static.findUserByCredentials = function (email, password) {
+userSchema.statics.findUserByCredentials = function (email, password) {
   this.findOne({ email }, { runValidators: true })
     .select('+password')
     .then((user) => {
