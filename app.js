@@ -2,17 +2,17 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const { celebrate, Joi, errors } = require('celebrate');
+const { errors } = require('celebrate');
 const cookieParser = require('cookie-parser');
 
 const auth = require('./middlewares/auth');
 const router = require('./routes/users');
 const routerCards = require('./routes/cards');
 const { createUser, login } = require('./controllers/users');
-const { reg } = require('./utils/reg');
+// const { reg } = require('./utils/reg');
 const errHandler = require('./middlewares/error-handler');
 // Установка порта
-
+// celebrate, Joi,
 const {
   PORT = 3000,
 } = process.env;
@@ -26,22 +26,10 @@ const app = express();
 
 app.use(cookieParser());
 app.use(helmet());
-app.post('/signin', celebrate({
-  body: Joi.object().keys({
-    email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'ru'] } }).required(),
-    password: Joi.string().required(),
-  }),
-}), login);
 
-app.post('/signup', celebrate({
-  body: Joi.object().keys({
-    name: Joi.string().min(2).max(30),
-    about: Joi.string().min(2).max(30),
-    avatar: Joi.string().pattern(new RegExp(reg)),
-    email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'ru'] } }).required(),
-    password: Joi.string().required(),
-  }),
-}), createUser);
+app.post('/signin', login);
+
+app.post('/signup', createUser);
 
 app.use('/', auth, router);
 
