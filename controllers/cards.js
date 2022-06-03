@@ -2,7 +2,7 @@ const Card = require('../models/cards');
 const NotFoundError = require('../errors/not-found');
 const BadRequestError = require('../errors/bad-request');
 const ForbiddenError = require('../errors/forbidden');
-
+// Получение списка карточек на странице
 const getCards = (_, res, next) => {
   Card.find({})
     .populate('owner')
@@ -10,6 +10,7 @@ const getCards = (_, res, next) => {
     .catch((err) => next(err));
 };
 
+// Создание карточки
 const createCard = (req, res, next) => {
   const { name, link } = req.body;
 
@@ -24,6 +25,7 @@ const createCard = (req, res, next) => {
     });
 };
 
+// Удаление карточки
 const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
@@ -45,6 +47,7 @@ const deleteCard = (req, res, next) => {
     });
 };
 
+// Лайк карточки
 const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
@@ -67,6 +70,7 @@ const likeCard = (req, res, next) => {
     });
 };
 
+// Дизлайк карточки
 const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
@@ -89,6 +93,7 @@ const dislikeCard = (req, res, next) => {
     });
 };
 
+// Экспорт модулей
 module.exports = {
   getCards,
   createCard,

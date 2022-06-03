@@ -7,6 +7,7 @@ const BadRequestError = require('../errors/bad-request');
 const UnauthorizedError = require('../errors/unauthorized');
 const ConflictError = require('../errors/conflict');
 
+// Логин уже зарегестрированного пользтвателя
 const login = (req, res, next) => {
   const { email, password } = req.body;
 
@@ -19,13 +20,10 @@ const login = (req, res, next) => {
     .catch(() => next(new UnauthorizedError('Неверные почта или пароль')));
 };
 
+// Регистрация нового пользователя
 const createUser = (req, res, next) => {
   const {
-    name,
-    about,
-    avatar,
-    email,
-    password,
+    name, about, avatar, email, password,
   } = req.body;
 
   return bcrypt.hash(password, 10)
@@ -56,6 +54,7 @@ const createUser = (req, res, next) => {
     });
 };
 
+// Получение списка всех зарегестрированных пользователей
 const getUsers = (_, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
@@ -92,6 +91,7 @@ const getUserMe = (req, res, next) => {
     .catch((err) => next(err));
 };
 
+// Изменение информации профиля пользователя
 const updateUser = (req, res, next) => {
   const { name, about } = req.body;
 
@@ -116,6 +116,7 @@ const updateUser = (req, res, next) => {
     });
 };
 
+// Изменение аватара профиля пользователя
 const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
@@ -139,6 +140,7 @@ const updateAvatar = (req, res, next) => {
     });
 };
 
+// Экспорт модулей
 module.exports = {
   createUser,
   getUsers,

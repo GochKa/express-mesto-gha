@@ -49,5 +49,6 @@ app.use((err, _, res, next) => {
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT}`);
+  // eslint-disable-next-line no-console
+  console.log(`Приложение запущено на порту ${PORT}`);
 });
