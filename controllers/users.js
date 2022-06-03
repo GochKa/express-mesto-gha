@@ -7,9 +7,9 @@ const NotFoundError = require('../errors/not-found');
 const BadRequestError = require('../errors/bad-request');
 const ConflictError = require('../errors/conflict');
 
-const { NODE_ENV, JWT_SECRET } = process.env;
+const { JWT_SECRET } = process.env;
 const MONGO_KEY_CODE = 11000;
-
+// NODE_ENV,
 //
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -105,7 +105,7 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
+        JWT_SECRET,
         { expiresIn: '7d' },
       );
       res
@@ -113,8 +113,8 @@ module.exports.login = (req, res, next) => {
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,
           sameSite: true,
-        })
-        .send({ message: 'Успешная авторизация' });
+        });
+      res.send({ token });
     })
     .catch(next);
 };
