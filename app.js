@@ -6,7 +6,7 @@ const { errors } = require('celebrate');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const auth = require('./middlewares/auth');
-const { createUser, login } = require('./controllers/users');
+const { login, createUser } = require('./controllers/users');
 const errHandler = require('./middlewares/error-handler');
 
 const NotFoundError = require('./errors/not-found');
@@ -31,11 +31,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet());
 
 app.post('/signin', validateLogin, login);
-
 app.post('/signup', validateUser, createUser);
 
 app.use('/', auth, users);
-
 app.use('/', auth, cards);
 
 app.use(() => {
@@ -45,6 +43,15 @@ app.use(() => {
 app.use(errors());
 
 app.use(errHandler);
+
+app.use((err, req, res, next) => {
+  if (err.status) {
+    res.status(err.status).send(err.message);
+    return;
+  }
+  res.status(500).send({ message: `На сервере произошла ошибка: ${err.message}` });
+  next();
+});
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
