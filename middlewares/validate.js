@@ -26,8 +26,8 @@ const validateUser = celebrate({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(20),
     avatar: Joi.string().custom(urlValidation),
-    email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
+    email: Joi.string().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'ru'] } }).required(),
+    password: Joi.string().required(),
   }),
 });
 

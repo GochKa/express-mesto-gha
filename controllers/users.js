@@ -7,7 +7,7 @@ const NotFoundError = require('../errors/not-found');
 const BadRequestError = require('../errors/bad-request');
 const ConflictError = require('../errors/conflict');
 
-const { JWT_SECRET } = process.env;
+const { JWT_SECRET_KEY } = process.env;
 const MONGO_KEY_CODE = 11000;
 // NODE_ENV,
 //
@@ -36,23 +36,39 @@ module.exports.getCurrentUser = (req, res, next) => {
 
 module.exports.createUser = (req, res, next) => {
   const {
-    name, about, avatar, email, password,
+    name,
+    about,
+    avatar,
+    email,
+    password,
   } = req.body;
 
   bcrypt.hash(password, 10)
     .then((hash) => User.create({
-      name, about, avatar, email, password: hash,
+      email,
+      password: hash,
+      name,
+      about,
+      avatar,
     }))
-    .catch((err) => {
-      if (err.name === 'MongoError' || err.code === MONGO_KEY_CODE) {
-        throw new ConflictError({ message: 'Пользователь с таким email уже зарегистрирован' });
-      } else next(err);
+    .then(({ _id }) => {
+      res.send({
+        _id,
+        name,
+        about,
+        avatar,
+        email,
+      });
     })
-    .then((user) => res.status(201).send({
-      data: {
-        name: user.name, about: user.about, avatar, email: user.email,
-      },
-    }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        throw new BadRequestError(
+          'Переданы некорректные данные для создания пользователя',
+        );
+      } else if (err.name === 'MongoError' && err.code === MONGO_KEY_CODE) {
+        throw new ConflictError(`Пользователь с email «${email}» уже существует`);
+      }
+    })
     .catch(next);
 };
 
@@ -105,16 +121,17 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        JWT_SECRET,
+        JWT_SECRET_KEY,
         { expiresIn: '7d' },
       );
+
       res
         .cookie('jwt', token, {
           maxAge: 3600000 * 24 * 7,
           httpOnly: true,
           sameSite: true,
-        });
-      res.send({ token });
+        })
+        .send({ token });
     })
     .catch(next);
 };

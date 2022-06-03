@@ -49,17 +49,18 @@ const userSchema = new mongoose.Schema({
 
 // eslint-disable-next-line func-names
 userSchema.statics.findUserByCredentials = function (email, password) {
-  this.findOne({ email }, { runValidators: true })
-    .select('+password')
+  return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new UnauthorizedError('Неверные email или password'));
+        throw new UnauthorizedError('Неправильные почта или пароль');
       }
+
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new UnauthorizedError('Неверные email или password'));
+            throw new UnauthorizedError('Неправильные почта или пароль');
           }
+
           return user;
         });
     });
