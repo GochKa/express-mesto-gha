@@ -17,7 +17,7 @@ const createUser = (req, res, next) => {
   } = req.body;
 
   if (!email || !password) {
-    next(BadRequestError('Не передан email или пароль'));
+    next(new BadRequestError('Не передан email или пароль'));
   }
 
   return bcrypt.hash(password, 10)
@@ -34,11 +34,11 @@ const createUser = (req, res, next) => {
       }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(BadRequestError('Переданы некорректные данные при создании пользователя'));
+        next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
       } else if (err.code === MONGO_KEY_CODE && err.name === 'MongoError') {
-        next(ConflictError('Пользователь с таким email уже существует'));
+        next(new ConflictError('Пользователь с таким email уже существует'));
       }
-      return next(err);
+      next(err);
     });
 };
 
@@ -56,13 +56,13 @@ const getUser = (req, res, next) => {
   User.findById(userId)
     .then((data) => {
       if (!data) {
-        throw new NotFoundError('Пользователь с таким id не найден в базе');
+        next(new NotFoundError('Пользователь с таким id не найден в базе'));
       }
       res.send(data);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new BadRequestError('Id пользователя не верный');
+        next(new BadRequestError('Id пользователя не верный'));
       }
     })
     .catch(next);
@@ -86,7 +86,7 @@ const patchUser = (req, res, next) => {
     .then((data) => res.send(data))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Некоректные name или about');
+        next(new BadRequestError('Некоректные name или about'));
       }
     })
     .catch(next);
@@ -109,7 +109,7 @@ const patchAvatar = (req, res, next) => {
     .then((data) => res.send(data))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequestError('Некоректная ссылка avatar');
+        next(new BadRequestError('Некоректная ссылка avatar'));
       }
     })
     .catch(next);
@@ -137,7 +137,7 @@ const getCurrentUser = (req, res, next) => {
   User.findById(usersId)
     .then((data) => {
       if (!data) {
-        throw new NotFoundError('Пользователь с указанным _id не найден');
+        next(new NotFoundError('Пользователь с указанным _id не найден'));
       }
       res.send(data);
     })
