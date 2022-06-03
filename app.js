@@ -2,17 +2,17 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const { errors } = require('celebrate');
+const { errors, celebrate, Joi } = require('celebrate');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const auth = require('./middlewares/auth');
 const { login, createUser } = require('./controllers/users');
 const errHandler = require('./middlewares/error-handler');
-
+const reg = require('./utils/reg');
 const NotFoundError = require('./errors/not-found');
-const users = require('./routes/users');
+const router = require('./routes/users');
 const cards = require('./models/cards');
-const { validateUser, validateLogin } = require('./middlewares/validate');
+
 // Установка порта
 const {
   PORT = 3000,
@@ -30,10 +30,23 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(helmet());
 
-app.post('/signin', validateLogin, login);
-app.post('/signup', validateUser, createUser);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().pattern(reg),
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), createUser);
 
-app.use('/', auth, users);
+app.use('/', auth, router);
 app.use('/', auth, cards);
 
 app.use(() => {
