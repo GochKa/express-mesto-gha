@@ -8,6 +8,7 @@ const BadRequestError = require('../errors/bad-request');
 const ConflictError = require('../errors/conflict');
 
 const { JWT_SECRET = 'secret-code' } = process.env;
+const MONGO_KEY_CODE = 11000;
 
 // Регистрация нового пользователя
 const createUser = (req, res, next) => {
@@ -16,7 +17,7 @@ const createUser = (req, res, next) => {
   } = req.body;
 
   if (!email || !password) {
-    return next(new BadRequestError('Не передан email или пароль'));
+    throw new BadRequestError('Не передан email или пароль');
   }
 
   return bcrypt.hash(password, 10)
@@ -33,10 +34,9 @@ const createUser = (req, res, next) => {
       }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return next(new BadRequestError('Переданы некорректные данные при создании пользователя'));
-      }
-      if (err.code === 11000) {
-        return next(new ConflictError('Пользователь с таким email уже существует'));
+        throw new BadRequestError('Переданы некорректные данные при создании пользователя');
+      } else if (err.code === MONGO_KEY_CODE && err.name === 'MongoError') {
+        throw new ConflictError('Пользователь с таким email уже существует');
       }
       return next(err);
     });
