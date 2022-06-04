@@ -35,7 +35,7 @@ app.post('/signup', celebrate({
     about: Joi.string().min(2).max(30),
     avatar: Joi.string().pattern(regEx),
     email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
+    password: Joi.string().required(),
   }),
 }), createUser);
 
@@ -47,7 +47,7 @@ app.use('/', auth, require('./routes/users'));
 app.use('/', auth, require('./routes/cards'));
 
 // Переход по несуществующему пути
-app.use('*', (_, __, next) => next(new NotFoundError('Запрашиваемая страница не найдена')));
+app.use('*', auth, (_, __, next) => next(new NotFoundError('Запрашиваемая страница не найдена')));
 
 app.use(errors());
 
